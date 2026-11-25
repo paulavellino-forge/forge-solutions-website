@@ -226,6 +226,96 @@
     .nav-toggle { display: block; }
   }
 
+  /* ——— BRAND VIDEO ——— */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .brand-video {
+    background: var(--navy);
+    padding: 0;
+  }
+  .brand-video-frame {
+    position: relative;
+    width: min(100%, var(--container), calc(72vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    margin: 0 auto;
+    background: var(--navy);
+  }
+  /* Desktop and tablet: once the video has played, the frame settles to half size */
+  @media (min-width: 769px) {
+    .brand-video-frame { transition: width 0.6s cubic-bezier(.2,.7,.3,1); }
+    .brand-video-frame.is-compact {
+      width: min(50%, calc(var(--container) / 2), calc(36vh * 16 / 9));
+    }
+    .brand-video-frame.no-anim { transition: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-video-frame { transition: none; }
+  }
+  .brand-video-media {
+    position: absolute;
+    inset: 0;
+    /* feather the edges so the footage melts into the navy band */
+    -webkit-mask-image:
+      linear-gradient(to right, transparent, #000 7%, #000 93%, transparent),
+      linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, transparent, #000 7%, #000 93%, transparent),
+      linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    mask-composite: intersect;
+  }
+  .brand-video-media img,
+  .brand-video-media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* the poster shows through until the video has a frame to paint */
+  .brand-video-media video { opacity: 0; transition: opacity 0.35s ease; }
+  .brand-video-media video.is-ready { opacity: 1; }
+  .brand-replay,
+  .brand-sound {
+    position: absolute;
+    bottom: clamp(10px, 3vw, 24px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(0,19,30,0.55);
+    color: var(--bone-dk);
+    border: 1px solid rgba(245,243,237,0.3);
+    border-radius: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .brand-replay { right: clamp(12px, 3vw, 28px); }
+  .brand-sound { left: clamp(12px, 3vw, 28px); }
+  .brand-replay:hover, .brand-replay:focus-visible,
+  .brand-sound:hover, .brand-sound:focus-visible { opacity: 1; border-color: var(--bone); background: var(--scarlet-dk); }
+  .brand-replay:focus-visible,
+  .brand-sound:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 2px; }
+  .brand-replay[hidden], .brand-sound[hidden] { display: none; }
+  .brand-replay .icon { font-family: var(--serif); font-size: 14px; line-height: 1; }
+  .brand-sound svg { width: 14px; height: 14px; flex: none; }
+  .brand-sound .waves { display: none; }
+  .brand-sound[aria-pressed="true"] .waves { display: inline; }
+  .brand-sound[aria-pressed="true"] .cross { display: none; }
+
   /* ——— HERO ——— */
   .hero {
     position: relative;
@@ -283,7 +373,7 @@
     background: var(--scarlet);
   }
 
-  .hero h1 {
+  .hero h2 {
     font-family: var(--display);
     font-weight: 600;
     font-size: clamp(2.5rem, 6.5vw, 5.25rem);
@@ -293,7 +383,7 @@
     margin: 0 0 1.5rem;
     max-width: 16ch;
   }
-  .hero h1 .accent {
+  .hero h2 .accent {
     color: var(--scarlet);
     position: relative;
     display: inline-block;
@@ -772,7 +862,7 @@
   /* ——— Reveal animation on load ——— */
   @media (prefers-reduced-motion: no-preference) {
     .hero-eyebrow,
-    .hero h1,
+    .hero h2,
     .hero p.lede,
     .hero-actions,
     .hero-meta {
@@ -780,7 +870,7 @@
       transform: translateY(14px);
       animation: rise 0.7s cubic-bezier(.2,.7,.3,1) forwards;
     }
-    .hero h1 { animation-delay: 0.08s; }
+    .hero h2 { animation-delay: 0.08s; }
     .hero p.lede { animation-delay: 0.18s; }
     .hero-actions { animation-delay: 0.28s; }
     .hero-meta { animation-delay: 0.4s; }
@@ -825,15 +915,35 @@
   </div>
 </nav>
 
+<!-- Brand video -->
+<section class="brand-video" id="top" aria-labelledby="brand-heading">
+  <h1 id="brand-heading" class="sr-only">Forge Solutions — Forging Digital Defense</h1>
+  <div class="brand-video-frame">
+    <div class="brand-video-media">
+      <picture>
+        <source srcset="assets/video/forge-brand-teaser-poster.webp" type="image/webp">
+        <img src="assets/video/forge-brand-teaser-poster.jpg" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
+      </picture>
+      <video id="brandVideo" muted playsinline preload="none"
+             width="1920" height="1080"
+             aria-label="Forge Solutions brand video: glowing steel is hammered on an anvil, the sparks become a network of connected points, and the Forge flame logo appears with the tagline Forging Digital Defense and securewithforge.com."
+             data-src-lg="assets/video/forge-brand-teaser-1080.mp4"
+             data-src-sm="assets/video/forge-brand-teaser-720.mp4"></video>
+    </div>
+    <button class="brand-sound" id="brandSound" type="button" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path class="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="cross" d="m16 9 6 6m0-6-6 6"/></svg><span class="label">Sound on</span></button>
+    <button class="brand-replay" id="brandReplay" type="button" hidden><span class="icon" aria-hidden="true">↻</span><span class="label">Replay</span></button>
+  </div>
+</section>
+
 <!-- Hero -->
-<header class="hero" id="top">
+<header class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">
       <span class="bar"></span>
-      SDVOSB Certified · Igniting Innovation · Securing Futures
+      SDVOSB Certified · Igniting Innovation · Forging Digital Defense
     </div>
 
-    <h1>Cybersecurity built for <span class="accent">federal mission owners.</span></h1>
+    <h2>Cybersecurity built for <span class="accent">federal mission owners.</span></h2>
 
     <p class="lede">
       Forge Solutions is a Service-Disabled Veteran-Owned Small Business delivering cybersecurity engineering, system architecture, and modernization services to the Department of Defense. We design, build, and operate the systems that defend DoD networks at enterprise scale.
@@ -1102,6 +1212,74 @@
       document.getElementById('navlinks').classList.remove('open');
     });
   });
+
+  // Brand video: autoplay once (muted), hold on the final frame, then offer Replay.
+  // Browsers only allow autoplay when muted, so sound is opt-in via the Sound button.
+  // The poster image sits underneath, so it shows until the video is ready,
+  // and it is all that shows when the visitor prefers reduced motion.
+  (function () {
+    var video = document.getElementById('brandVideo');
+    var btn = document.getElementById('brandReplay');
+    if (!video || !btn) return;
+    var label = btn.querySelector('.label');
+    var sound = document.getElementById('brandSound');
+    var soundLabel = sound.querySelector('.label');
+    var wantSound = false;
+    var frame = video.closest('.brand-video-frame');
+    var below = document.querySelector('.hero');
+
+    // Shrink (or grow back) the frame. It animates only while the visitor is still
+    // at the top of the page; otherwise it changes instantly and the scroll position
+    // is corrected so the content being read does not move.
+    function setCompact(on, animate) {
+      if (frame.classList.contains('is-compact') === on) return;
+      if (animate && window.scrollY < 80) {
+        frame.classList.remove('no-anim');
+        frame.classList.toggle('is-compact', on);
+        return;
+      }
+      var root = document.documentElement;
+      var before = below.getBoundingClientRect().top;
+      root.style.overflowAnchor = 'none';
+      frame.classList.add('no-anim');
+      frame.classList.toggle('is-compact', on);
+      var shift = below.getBoundingClientRect().top - before;
+      if (shift && before < window.innerHeight) window.scrollBy({ top: shift, behavior: 'instant' });
+      root.style.overflowAnchor = '';
+    }
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var small = window.matchMedia('(max-width: 768px)').matches;
+    var loaded = false;
+
+    function offer(text) { label.textContent = text; btn.hidden = false; }
+    function start() {
+      if (!loaded) {
+        video.src = small ? video.dataset.srcSm : video.dataset.srcLg;
+        loaded = true;
+      } else {
+        video.currentTime = 0;
+      }
+      video.muted = !wantSound;
+      btn.hidden = true;
+      setCompact(false, !reduce);
+      var p = video.play();
+      if (p && p.catch) p.catch(function () { video.classList.remove('is-ready'); offer('Play'); });
+    }
+    function setSound(on) {
+      wantSound = on;
+      video.muted = !on;
+      sound.setAttribute('aria-pressed', on ? 'true' : 'false');
+      soundLabel.textContent = on ? 'Sound off' : 'Sound on';
+    }
+
+    video.addEventListener('playing', function () { video.classList.add('is-ready'); sound.hidden = false; });
+    sound.addEventListener('click', function () { setSound(!wantSound); });
+    video.addEventListener('ended', function () { offer('Replay'); setCompact(true, !reduce); });
+    video.addEventListener('error', function () { video.classList.remove('is-ready'); });
+    btn.addEventListener('click', start);
+
+    if (reduce) { setCompact(true, false); offer('Play'); } else start();
+  })();
 </script>
 
 </body>
